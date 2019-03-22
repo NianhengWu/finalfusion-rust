@@ -41,7 +41,12 @@ fn parse_args() -> ArgMatches<'static> {
                 .index(1)
                 .required(true),
         )
-        .arg(Arg::with_name(OUTPUT).help("Output file").index(2))
+        .arg(
+            Arg::with_name(OUTPUT)
+                .help("Output file")
+                .index(2)
+                .required(true),
+        )
         .arg(
             Arg::with_name(INPUT_FORMAT)
                 .short("f")
