@@ -132,6 +132,7 @@ pub type FinalfusionHashIndexer = HashIndexer<FnvHasher>;
 pub struct ExplicitIndexer {
     ngrams: Vec<String>,
     index: HashMap<String, u64>,
+    bound: u64,
 }
 
 impl ExplicitIndexer {
@@ -141,18 +142,21 @@ impl ExplicitIndexer {
 }
 
 impl ExplicitIndexer {
-    pub fn new<V>(ngrams: V) -> Self
-    where
-        V: Into<Vec<String>>,
-    {
-        let ngrams = ngrams.into();
-        let index = ngrams
-            .iter()
-            .cloned()
-            .enumerate()
-            .map(|(idx, ngram)| (ngram, idx as u64))
-            .collect::<HashMap<String, u64>>();
-        ExplicitIndexer { ngrams, index }
+    pub fn new(ngrams: Vec<(String, u64)>) -> Self {
+        let mut bound = 0;
+        let mut index = HashMap::new();
+        for (ngram, idx) in ngrams.iter().cloned() {
+            index.insert(ngram, idx);
+            if idx > bound {
+                bound = idx
+            }
+        }
+        let ngrams = ngrams.into_iter().map(|(ngram, _)| ngram).collect();
+        ExplicitIndexer {
+            ngrams,
+            index,
+            bound: bound + 1,
+        }
     }
 }
 
@@ -162,7 +166,7 @@ impl Indexer for ExplicitIndexer {
     }
 
     fn upper_bound(&self) -> u64 {
-        self.index.len() as u64
+        self.bound
     }
 }
 
